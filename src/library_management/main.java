@@ -15,7 +15,7 @@ public class main{
 				while(test) {
 					System.out.println("voici les différents choix que vous pouvez effectuer\n");
 					System.out.println("   ******menu******");
-					System.out.println("1) consulter catalogue\n2)afficher les details d'un livre\n3) afficher profile\n4) emprunter livre\n00) quitter");
+					System.out.println("1) consulter catalogue\n2)afficher les details d'un livre\n3) afficher profile\n4) emprunter livre\n5) retourner livre\n00) quitter");
 					int choix_menu = sc.nextInt();
 					switch (choix_menu) {
 					case 1:
@@ -33,6 +33,13 @@ public class main{
 						System.out.println("donner l'id de livre que vous voulez emprunter:");
 						int id_livre = sc.nextInt();
 						User.emprunter_livre(id_livre,id_user);
+						break;
+					case 5:
+						System.out.println("donner votre id:");
+						int id_user1 = sc.nextInt();
+						System.out.println("donner l'id de livre que vous voulez emprunter:");
+						int id_livre1 = sc.nextInt();
+						User.Retour_Livre(id_user1, id_livre1);
 						break;
 					case 00:
 						System.out.println("à bientot");

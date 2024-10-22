@@ -208,6 +208,58 @@ public class User {
     	}
     }
     
+    public static void Retour_Livre (int id_utilisateur,int id_livre) {
+    	Connection connect = null;
+    	PreparedStatement st = null;
+    	PreparedStatement st1 = null;
+    	PreparedStatement st2 = null;
+    	PreparedStatement st3 = null;
+    	ResultSet rs = null;
+    	ResultSet rs1 = null;
+    	LocalDate dateActuelle = LocalDate.now();
+    	try {
+    		connect = Database_connection.OpenConnection();
+    		String query = "select * from livre where id=?";
+    		st = connect.prepareStatement(query);
+    		st.setInt(1,id_livre);
+    		rs = st.executeQuery();
+    		if(rs.next()) {
+    			String query1 = "select * from Emprunt where id_livre=?";
+    			st1 = connect.prepareStatement(query1);
+    			st1.setInt(1, id_livre);
+    			rs1 = st1.executeQuery();
+    			if(rs1.next()) {
+    				Date date_retour = rs1.getDate("date_retour");
+    				if(date_retour != null) {
+    					System.out.println("ce livre est déja retourné. \n");
+    				}else {
+    					// Mettre à jour la disponibilité du livre
+    					String query2 = "update livre set disponibilité = ? where id = ? ";
+    					st2 = connect.prepareStatement(query2);
+    					st2.setString(1,"disponible"); 
+	            		st2.setInt(2,id_livre);
+	            		st2.executeUpdate();
+	            		// Mettre à jour le statut de la Table Emprunt 
+	            		String query3 = "update Emprunt set date_retour=? where id_livre = ? ";
+	            		st3 = connect.prepareStatement(query3);
+	            		st3.setDate(1,java.sql.Date.valueOf(dateActuelle));
+	            		st3.setInt(2,id_livre);
+	            		st3.executeUpdate();
+	            		System.out.println(" Le retour du livre a été réalisé avec succès \n ");
+    				}
+    			}else {
+    				System.out.println("ce livre n'est pas emprunté. \n");
+    			}
+    		}else {
+    			System.out.println("aucun livre trouvé avec cet identifiant. \n");
+    		}
+    	}catch(SQLException e) {
+    		e.getMessage();
+    	}finally {
+    		
+    	}
+    }
+    
     public static void afficher_users() {
     	Connection connect = null;
     	PreparedStatement st = null;
