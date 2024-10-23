@@ -224,11 +224,12 @@ public class User {
     		st.setInt(1,id_livre);
     		rs = st.executeQuery();
     		if(rs.next()) {
-    			String query1 = "select * from Emprunt where id_livre=?";
+    			String query1 = "select * from Emprunt where id_livre=? and id_user =? and date_retour is null";
     			st1 = connect.prepareStatement(query1);
     			st1.setInt(1, id_livre);
+    			st1.setInt(2, id_utilisateur);
     			rs1 = st1.executeQuery();
-    			if(rs1.next()) {
+    			while(rs1.next()) {
     				Date date_retour = rs1.getDate("date_retour");
     				if(date_retour != null) {
     					System.out.println("ce livre est déja retourné. \n");
@@ -247,8 +248,6 @@ public class User {
 	            		st3.executeUpdate();
 	            		System.out.println(" Le retour du livre a été réalisé avec succès \n ");
     				}
-    			}else {
-    				System.out.println("ce livre n'est pas emprunté. \n");
     			}
     		}else {
     			System.out.println("aucun livre trouvé avec cet identifiant. \n");
@@ -256,60 +255,13 @@ public class User {
     	}catch(SQLException e) {
     		e.getMessage();
     	}finally {
-    		
-    	}
-    }
-    
-    public static void afficher_users() {
-    	Connection connect = null;
-    	PreparedStatement st = null;
-    	ResultSet rs = null;
-    	try {
-    		connect = Database_connection.OpenConnection();
-    		String query = "select nom , prenom from user where role=?";
-    		st = connect.prepareStatement(query);
-    		st.setString(1,"etudiant");
-    		rs = st.executeQuery();
-    		System.out.println("nom et prenom des utilisateurs:");
-    		while(rs.next()) {
-    			System.out.println(rs.getString("nom")+" "+rs.getString("prenom"));
-    		}
-    	}catch(SQLException e) {
-    		e.getMessage();
-    	}finally {
-    		Database_connection.CloseConnection(connect);
-    		Database_connection.ClosePreparedStatement(st);
     		Database_connection.CloseResult(rs);
-    	}
-    }
-    public static void ajouter_livre() {
-    	Connection connect = null;
-    	PreparedStatement st = null;
-    	Scanner sc = new Scanner(System.in);
-    	try {
-    		System.out.println("donner le titre du livre\n");
-    		String titre = sc.nextLine();
-    		System.out.println("donner le genre du livre\n");
-    		String genre = sc.nextLine();
-    		System.out.println("donner l'auteur du livre\n");
-    		String auteur = sc.nextLine();
-    		System.out.println("donner la disponibilité du livre\n");
-    		String disponibilité = sc.nextLine();
-    		
-    		connect = Database_connection.OpenConnection();
-    		String query = "insert into livre (titre , genre , auteur , disponibilité) values(?,?,?,?)";
-    		st = connect.prepareStatement(query);
-    		st.setString(1, titre);
-    		st.setString(2, genre);
-    		st.setString(3, auteur);
-    		st.setString(4, disponibilité);
-    		st.executeUpdate();
-    		System.out.println( " livre ajouté avec succès ! \n ");
-    	}catch(SQLException e) {
-    		e.getMessage();
-    	}finally {
-    		Database_connection.CloseConnection(connect);
-    		Database_connection.ClosePreparedStatement(st);
+            Database_connection.CloseResult(rs1);
+            Database_connection.ClosePreparedStatement(st);
+            Database_connection.ClosePreparedStatement(st1);
+            Database_connection.ClosePreparedStatement(st2);
+            Database_connection.ClosePreparedStatement(st3);
+            Database_connection.CloseConnection(connect);
     	}
     }
 }

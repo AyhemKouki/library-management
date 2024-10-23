@@ -15,7 +15,8 @@ public class main{
 				while(test) {
 					System.out.println("voici les différents choix que vous pouvez effectuer\n");
 					System.out.println("   ******menu******");
-					System.out.println("1) consulter catalogue\n2)afficher les details d'un livre\n3) afficher profile\n4) emprunter livre\n5) retourner livre\n00) quitter");
+					System.out.println("1) consulter catalogue\n2)afficher les details d'un livre\n"
+										+ "3) afficher profile\n4) emprunter livre\n5) retourner livre\n00) quitter");
 					int choix_menu = sc.nextInt();
 					switch (choix_menu) {
 					case 1:
@@ -32,12 +33,12 @@ public class main{
 						int id_user = sc.nextInt();
 						System.out.println("donner l'id de livre que vous voulez emprunter:");
 						int id_livre = sc.nextInt();
-						User.emprunter_livre(id_livre,id_user);
+						User.emprunter_livre(id_user,id_livre);
 						break;
 					case 5:
 						System.out.println("donner votre id:");
 						int id_user1 = sc.nextInt();
-						System.out.println("donner l'id de livre que vous voulez emprunter:");
+						System.out.println("donner l'id de livre que vous voulez retourner:");
 						int id_livre1 = sc.nextInt();
 						User.Retour_Livre(id_user1, id_livre1);
 						break;
@@ -56,14 +57,25 @@ public class main{
 				while(test) {
 					System.out.println("\nvoici les différents choix que vous pouvez effectuer\n");
 					System.out.println("   ******menu******");
-					System.out.println("1) afficher les utilisateurs\n2)ajouter un livre\n00) quitter");
+					System.out.println("1) afficher les utilisateurs\n2) ajouter un livre\n"
+										+ "3) consulter l'historique des emprunts\n4) afficher les livres les plus empruntés\n"
+										+ "5)afficher les utilisateurs les plus assidus\n00) quitter");
 					int choix_menu = sc.nextInt();
 					switch (choix_menu) {
 					case 1:
-						User.afficher_users();
+						Admin.afficher_users();
 						break;
 					case 2:
-						User.ajouter_livre();
+						Admin.ajouter_livre();
+						break;
+					case 3:
+						Admin.Consulter_Historique_Emprunts();
+						break;
+					case 4:
+						Admin.livres_les_plus_empruntés();
+						break;
+					case 5:
+						Admin.utilisateurs_plus_assidus();
 						break;
 					case 00:
 						System.out.println("à bientot admin");
