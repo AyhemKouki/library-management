@@ -58,8 +58,9 @@ public class User {
     			System.out.println("votre nom: "+rs.getString("nom"));
     			System.out.println("votre prenom: "+rs.getString("prenom"));
     			System.out.println("votre username: "+rs.getString("username"));
+    			System.out.println("votre email: "+rs.getString("email"));
     		}
-    		
+    		System.out.println("\n");
     	}catch(SQLException  e) {
     		e.getMessage();
     	}finally {
@@ -84,14 +85,17 @@ public class User {
     		String username = sc.nextLine();
     		System.out.println("saisir votre password");
     		String pwd = sc.nextLine();
+    		System.out.println("saisir votre email");
+    		String email = sc.nextLine();
     		
     		connect = Database_connection.OpenConnection();
-    		String query = "insert into user (nom , prenom , username , pwd) values(?,?,?,?)";
+    		String query = "insert into user (nom , prenom , username , pwd , email) values(?,?,?,?,?)";
     		st = connect.prepareStatement(query);
     		st.setString(1, nom);
     		st.setString(2, prenom);
     		st.setString(3, username);
     		st.setString(4, pwd);
+    		st.setString(5, email);
     		st.executeUpdate();
     		System.out.println( " Utilisateur ajouté avec succès ! \n ");
     	}catch(SQLException e) {
@@ -121,6 +125,7 @@ public class User {
                 System.out.println("livre "+i+": "+titre );
                 
             }
+            System.out.println("\n");
            } catch (SQLException e) {
             e.getMessage();
            } finally {
@@ -143,6 +148,7 @@ public class User {
     		st.setString(1,titre);
     		rs = st.executeQuery();
     		if (rs.next()) {
+    			System.out.println("\n");
     			System.out.println("   ***** details de livre *****");
     			System.out.println("id_livre: "+rs.getInt("id"));
     			System.out.println("titre: "+rs.getString("titre"));
@@ -152,6 +158,7 @@ public class User {
     		}else {
     			System.out.println("il n y a pas de livre");
     		}
+    		System.out.println("\n");
     	}catch(SQLException e) {
     		e.getMessage();
     	}finally {
@@ -166,7 +173,9 @@ public class User {
     	PreparedStatement st = null;
     	PreparedStatement st1 = null;
     	PreparedStatement st2 = null;
+    	PreparedStatement st3 = null;
     	ResultSet rs = null;
+    	Scanner sc = new Scanner(System.in);
     	LocalDate date_actuelle = LocalDate.now();
     	try {
     		connect = Database_connection.OpenConnection();
@@ -190,9 +199,25 @@ public class User {
     				st2.setDate(3, java.sql.Date.valueOf(date_actuelle));
     				st2.setDate(4, null);
     				st2.executeUpdate();
-    				System.out.println("l'emprunt a été réalisé avec succés");
+    				System.out.println("l'emprunt a été réalisé avec succés\n");
     			}else {
-    				System.out.println("désolé le livre est non disponible pour le moment , vous pouvez le réserver");
+    				System.out.println("désolé le livre est non disponible pour le moment\n");
+    				System.out.println("souhaitez-vous être informé lorsque le livre sera disponible (Y/N)\n");
+    				String reponse = sc.nextLine();
+    				if(reponse.equals("y")|| reponse.equals("Y")|| reponse.equals("yes")|| reponse.equals("YES")) {
+    					System.out.println("donner votre email\n");
+    					String userEmail = sc.nextLine();
+    					
+    					// Save email to notification table
+    					String query4 = "insert into notification (id_livre , email) values (?,?)";
+    					st3 = connect.prepareStatement(query4);
+    					st3.setInt(1, id_livre);
+    					st3.setString(2,userEmail);
+    					st3.executeUpdate();
+    					System.out.println("Vous serez informé lorsque le livre sera disponible.\n");
+    				}else {
+    					System.out.println("D'accord , n'hésitez pas de nous contacter s'il ya un problème\n.");
+    				}
     			}
     		}else {
     			System.out.println("il n ya aucun livre avec cet id"+ id_livre);
@@ -204,6 +229,7 @@ public class User {
     		Database_connection.ClosePreparedStatement(st);
     		Database_connection.ClosePreparedStatement(st1);
     		Database_connection.ClosePreparedStatement(st2);
+    		Database_connection.ClosePreparedStatement(st3);
     		Database_connection.CloseResult(rs);
     	}
     }
@@ -247,6 +273,7 @@ public class User {
 	            		st3.setInt(2,id_livre);
 	            		st3.executeUpdate();
 	            		System.out.println(" Le retour du livre a été réalisé avec succès \n ");
+	            		notifierUsers(id_livre);
     				}
     			}
     		}else {
@@ -263,5 +290,40 @@ public class User {
             Database_connection.ClosePreparedStatement(st3);
             Database_connection.CloseConnection(connect);
     	}
+    }
+    
+    public static void notifierUsers(int id_livre) {
+    	Connection connect = null;
+    	PreparedStatement st = null;
+    	PreparedStatement deleteSt = null;
+    	ResultSet rs = null;
+    	try {
+            connect = Database_connection.OpenConnection();
+            String query = "SELECT email FROM notification WHERE id_livre = ?";
+            st = connect.prepareStatement(query);
+            st.setInt(1, id_livre);
+            rs = st.executeQuery();
+
+            while (rs.next()) {
+                String email = rs.getString("email");
+                String subject = "Livre disponible!";
+                String body = "Le livre que vous attendiez est maintenant disponible. Veuillez le réserver dès que possible.";
+                Email.sendEmail(email, subject, body);
+            }
+
+            // Delete notifications after sending
+            String deleteQuery = "DELETE FROM notification WHERE id_livre = ?";
+            deleteSt = connect.prepareStatement(deleteQuery);
+            deleteSt.setInt(1, id_livre);
+            deleteSt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            Database_connection.CloseConnection(connect);
+            Database_connection.ClosePreparedStatement(st);
+            Database_connection.ClosePreparedStatement(deleteSt);
+            Database_connection.CloseResult(rs);
+        }
     }
 }

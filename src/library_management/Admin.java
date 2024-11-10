@@ -115,7 +115,10 @@ public class Admin {
             rs = st.executeQuery();
             
             System.out.println("Livres les plus empruntés :\n");
-            while (rs.next()) {
+            // limiter l'affichage aux 3 premiers livres
+            int count = 0;
+            while (rs.next() && count <3) {
+            	count ++;
                 int idLivre = rs.getInt("id_livre");
                 int nombre_emprunts = rs.getInt("nombre_emprunts");
 
@@ -126,7 +129,7 @@ public class Admin {
                 rsTitre = stTitre.executeQuery();
                 if (rsTitre.next()) {
                     String titre = rsTitre.getString("titre");
-                    System.out.println("Titre : " + titre + " | Nombre d'emprunts : " + nombre_emprunts);
+                    System.out.println("Top "+count+": "+"Titre : " + titre + " | Nombre d'emprunts : " + nombre_emprunts);
                 }
             }
         } catch (SQLException e) {
@@ -168,7 +171,7 @@ public class Admin {
                 if (rs1.next()) {
                     String nom = rs1.getString("nom");
                     String prenom = rs1.getString("prenom");
-                    System.out.println("Rank : " + rank +" | Nom : " + nom + " Preom : " + prenom +
+                    System.out.println("Rank : " + rank +" | Nom : " + nom + " Prenom : " + prenom +
                     					" | Nombre d'emprunts : " + nombre_emprunts);
                 }
         	}
